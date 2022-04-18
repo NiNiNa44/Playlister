@@ -3,12 +3,12 @@ class Min_Heap:
     def __init__(self, cap):
         self.cap = cap
         self.size = 0
-        self.Heap = [0]*(self.cap + 1)
-        self.Heap[0] = 100
+        self.Heap = [0, 0]*(self.cap + 1)
+        self.Heap[0] = [-1, -1]
         self.FRONT = 1
-        self.index = list(range(0, cap + 1))
 
     # find parent from the position of the children
+
     def parent(self, pos):
         return pos//2
 
@@ -26,22 +26,19 @@ class Min_Heap:
 
     # Swap node
     def swap(self, fpos, spos):
-        tmp1 = self.Heap[fpos]
-        tmp2 = self.index[fpos]
+        tmp = self.Heap[fpos]
         self.Heap[fpos] = self.Heap[spos]
-        self.index[fpos] = self.index[spos]
-        self.Heap[spos] = tmp1
-        self.index[spos] = tmp2
+        self.Heap[spos] = tmp
 
     def heapify(self, pos):
 
         if not self.is_leaf(pos):
             # check if a parent contains higher values than its children
-            if (self.Heap[pos] > self.Heap[self.leftChild(pos)] or
-               self.Heap[pos] > self.Heap[self.rightChild(pos)]):
+            if (self.Heap[pos][0] > self.Heap[self.leftChild(pos)][0] or
+               self.Heap[pos][0] > self.Heap[self.rightChild(pos)][0]):
 
                 # Left swap case
-                if self.Heap[self.leftChild(pos)] < self.Heap[self.rightChild(pos)]:
+                if self.Heap[self.leftChild(pos)][0] < self.Heap[self.rightChild(pos)][0]:
                     self.swap(pos, self.leftChild(pos))
                     self.heapify(self.leftChild(pos))
                 # Right swap case
@@ -51,13 +48,14 @@ class Min_Heap:
 
     # Insert function
     def insert(self, node):
+
         if self.size >= self.cap:
             return
         self.size = self.size + 1
         self.Heap[self.size] = node
 
         curr = self.size
-        while self.Heap[curr] < self.Heap[self.parent(curr)]:
+        while self.Heap[curr][0] < self.Heap[self.parent(curr)][0]:
             self.swap(curr, self.parent(curr))
             curr = self.parent(curr)
 
@@ -66,20 +64,12 @@ class Min_Heap:
             print(" parent : " + str(self.Heap[i])+" left baby => " +
                   str(self.Heap[2 * i])+" right baby => : " +
                   str(self.Heap[2 * i + 1]))
-
-    # Function to build the min heap using
-    # the minHeapify function
-    def minHeap(self):
-
-        for pos in range(self.size//2, 0, -1):
-            self.heapify(pos)
-
     # pop min index
-    def pop(self):
 
-        popped = self.Heap[self.FRONT]
+    def pop(self):
+        popped_val = self.Heap[self.FRONT][0]
+        popped_index = self.Heap[self.FRONT][1]
         self.Heap[self.FRONT] = self.Heap[self.size]
-        self.index[self.FRONT] = self.index[self.size]
         self.size = self.size - 1
         self.heapify(self.FRONT)
-        return popped, self.index[self.FRONT]
+        return popped_val, popped_index
