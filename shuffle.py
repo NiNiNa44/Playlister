@@ -91,7 +91,7 @@ class graph:
                 diff = abs(diff)
                 corr = (diff/self.popularity[track])
 
-                if density[i] > 0.02:
+                if self.density[i] > 0.02:
                     corr = corr + step * step_count
                     step_count = step_count + 1
             self.correlation.append([corr, i])
