@@ -127,7 +127,8 @@ def mod_playlist(playlist):
         mod_playlist.append(track['artists'])
     return mod_playlist, popularity
 
-
+# Sample uses of the functions
+# To be removed later
 playlist, popularity = mod_playlist(playlist)
 g = graph(playlist, popularity)
 density = g.get_density()
