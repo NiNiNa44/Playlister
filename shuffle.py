@@ -29,10 +29,8 @@
 # NOTE: No modifications to array, only refer to index to avoid any resizing, reallocation
 
 import random as rand
-from random import randrange, sample
-from math import floor
 from sample import playlist
-from heapq import heapify, heappush, heappop
+from heap import *
 
 
 """ GRAPH """
@@ -135,4 +133,19 @@ density = g.get_density()
 popularity = g.popularity
 corr = g.get_correlation(1)  # input base index
 
-""" TODO: sort corr and keep track of indexs (using heap?)"""
+# Min_heap uses
+
+heap = Min_Heap(g.total_track)
+
+for item in corr:
+    heap.insert(item)
+
+print(corr)
+print('_____________')
+
+shuffled = []
+
+for i in range(g.total_track):
+    tmp, index = heap.pop()
+    shuffled.append(index)
+print(shuffled)
