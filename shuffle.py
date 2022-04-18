@@ -29,6 +29,7 @@
 # NOTE: No modifications to array, only refer to index to avoid any resizing, reallocation
 
 import random as rand
+from random import randrange, sample
 from sample import playlist
 from heap import *
 
@@ -64,6 +65,7 @@ class graph:
                     self.artists.setdefault(artist[0], [])
                     self.artists[artist[0]].append(i)
 
+    # density = artist_appeared/total_tracks
     def get_density(self):
         for a in playlist:
             a = a[0]
@@ -73,26 +75,26 @@ class graph:
                 self.density.append(1/self.total_track)
         return self.density
 
+    # calculate from seed track
     def get_correlation(self, track):
         pivot_artist = playlist[track]
+        # count tracks with significant density
         count = sum(1 for i in self.density if i > 0.02)
         step = 1/count
         step_count = 1
         for i, a in enumerate(playlist):
             if pivot_artist == a:
-                self.correlation.append(1)
+                corr = 1
             else:
+                # calculate correlation for track with significant popularity difference
                 diff = self.popularity[track] - self.popularity[i]
-                if abs(diff) > 0.15:
-                    corr = min(self.popularity[i], self.popularity[track]) / \
-                        max(self.popularity[i], self.popularity[track])
-                else:
-                    corr = self.popularity[i]/self.popularity[track]
+                diff = abs(diff)
+                corr = (diff/self.popularity[track])
 
                 if density[i] > 0.02:
                     corr = corr + step * step_count
                     step_count = step_count + 1
-                self.correlation.append(corr)
+            self.correlation.append([corr, i])
         return self.correlation
 
 
@@ -125,27 +127,40 @@ def mod_playlist(playlist):
         mod_playlist.append(track['artists'])
     return mod_playlist, popularity
 
-# Sample uses of the functions
-# To be removed later
+
+# Example:
+
+"""
+HOW-TO
+
+1. get 'playlist' and 'popularity' from mod_playlist(input)
+2. create an array of int, shuffle using fisher_yates() to generate random seed
+3. create a graph using (inputs are playlist & popularity)
+4. use get_correlation with the input of seed
+5. create min heap with the size of the playlist
+6. insert score array in min heap
+
+"""
+
+
 playlist, popularity = mod_playlist(playlist)
+
+seed = list(range(0, 100))
+fisher_yates(seed)
+print(seed)
 g = graph(playlist, popularity)
-density = g.get_density()
-popularity = g.popularity
-corr = g.get_correlation(1)  # input base index
+corr = g.get_correlation(seed[4])  # input base index
 
 # Min_heap uses
-
 heap = Min_Heap(g.total_track)
 
 for item in corr:
     heap.insert(item)
 
-print(corr)
-print('_____________')
-
 shuffled = []
-
-for i in range(g.total_track):
-    tmp, index = heap.pop()
+data = []
+for j in range(g.total_track):
+    tmp, index = heap.pop()  # return score, index
     shuffled.append(index)
-print(shuffled)
+    data.append(tmp)
+print(shuffled[3])  # shuffled index
