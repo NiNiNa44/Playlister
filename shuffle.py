@@ -32,6 +32,7 @@ import random as rand
 from random import randrange, sample
 from sample import playlist
 from heap import *
+import numpy as np
 
 
 """ GRAPH """
@@ -76,10 +77,12 @@ class graph:
         return self.density
 
     # calculate from seed track
-    def get_correlation(self, track):
+   def get_correlation(self, track):
         pivot_artist = playlist[track]
         # count tracks with significant density
-        count = sum(1 for i in self.density if i > 0.02)
+        self.get_density()
+        density_condition = np.quantile(self.density, 0.75)
+        count = sum(1 for i in self.density if i > density_condition)
         step = 1/count
         step_count = 1
         for i, a in enumerate(playlist):
