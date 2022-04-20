@@ -33,6 +33,23 @@ from random import randrange, sample
 from sample import playlist
 from heap import *
 import numpy as np
+import copy
+
+
+""" HELPER FUNCTIONS """
+
+
+def mod_playlist(playlist=playlist):
+    mod_playlist = []
+    popularity = []
+    for track in playlist:
+        track.pop('name')
+        track.pop('image_url')
+        track.pop('preview_url')
+        popularity.append(track['popularity']/100)
+        track.pop('popularity')
+        mod_playlist.append(track['artists'])
+    return mod_playlist, popularity
 
 
 """ GRAPH """
@@ -68,7 +85,7 @@ class graph:
 
     # density = artist_appeared/total_tracks
     def get_density(self):
-        for a in playlist:
+        for a in self.playlist:
             a = a[0]
             if a in self.artists:
                 self.density.append(len(self.artists[a])/self.total_track)
@@ -77,8 +94,8 @@ class graph:
         return self.density
 
     # calculate from seed track
-   def get_correlation(self, track):
-        pivot_artist = playlist[track]
+    def get_correlation(self, track):
+        pivot_artist = self.playlist[track]
         # count tracks with significant density
         self.get_density()
         density_condition = np.quantile(self.density, 0.75)
@@ -113,26 +130,6 @@ def fisher_yates(bucket):
         bucket[x], bucket[j] = bucket[j], bucket[x]
 
 
-""" HELPER FUNCTIONS """
-
-# Modify Playlist
-
-
-def mod_playlist(playlist):
-    mod_playlist = []
-    popularity = []
-    for track in playlist:
-        track.pop('name')
-        track.pop('image_url')
-        track.pop('preview_url')
-        popularity.append(track['popularity']/100)
-        track.pop('popularity')
-        mod_playlist.append(track['artists'])
-    return mod_playlist, popularity
-
-
-# Example:
-
 """
 HOW-TO
 
@@ -146,24 +143,28 @@ HOW-TO
 """
 
 
-playlist, popularity = mod_playlist(playlist)
+def psuedo_shuffle(playlist):
+    original = copy.deepcopy(playlist)
+    shuffled = []
+    if len(playlist) > 100:
+        seed = list(range(0, 100))
+    else:
+        seed = list(range(0, len(playlist)))
+    fisher_yates(seed)
+    mod, popularity = mod_playlist(playlist=playlist)
+    g = graph(mod, popularity)
+    corr = g.get_correlation(seed[0])
+    # heap sort
+    heap = Min_Heap(g.total_track)
+    for item in corr:
+        heap.insert(item)
+    for j in range(g.total_track):
+        tmp, index = heap.pop()  # return score, index
+        shuffled.append(index)
+    for index in shuffled:
+        playlist[index] = original[index]
+    return playlist
 
-seed = list(range(0, 100))
-fisher_yates(seed)
-print(seed)
-g = graph(playlist, popularity)
-corr = g.get_correlation(seed[4])  # input base index
 
-# Min_heap uses
-heap = Min_Heap(g.total_track)
-
-for item in corr:
-    heap.insert(item)
-
-shuffled = []
-data = []
-for j in range(g.total_track):
-    tmp, index = heap.pop()  # return score, index
-    shuffled.append(index)
-    data.append(tmp)
-print(shuffled[3])  # shuffled index
+psuedo_shuffle(playlist)
+print(playlist)
