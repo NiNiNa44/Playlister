@@ -123,11 +123,13 @@ class graph:
 # Fisher-Yates
 
 
-def fisher_yates(bucket):
+def fisher_yates(original_bucket):
+    bucket = copy.deepcopy(original_bucket)
     size = len(bucket)
     for x in range(0, size - 1):    # range [x, y)
         j = rand.randint(x, size - 1)    # randint [x, y]
         bucket[x], bucket[j] = bucket[j], bucket[x]
+    return bucket
 
 
 """
@@ -143,15 +145,15 @@ HOW-TO
 """
 
 
-def psuedo_shuffle(playlist):
-    original = copy.deepcopy(playlist)
+def psuedo_shuffle(original_playlist):
+    playlist = copy.deepcopy(original_playlist)
     shuffled = []
     if len(playlist) > 100:
         seed = list(range(0, 100))
     else:
         seed = list(range(0, len(playlist)))
     fisher_yates(seed)
-    mod, popularity = mod_playlist(playlist=playlist)
+    mod, popularity = mod_playlist(playlist)
     g = graph(mod, popularity)
     corr = g.get_correlation(seed[0])
     # heap sort
@@ -161,10 +163,7 @@ def psuedo_shuffle(playlist):
     for j in range(g.total_track):
         tmp, index = heap.pop()  # return score, index
         shuffled.append(index)
-    for index in shuffled:
-        playlist[index] = original[index]
+
+    for i, index in enumerate(shuffled):
+        playlist[i] = original_playlist[index]
     return playlist
-
-
-psuedo_shuffle(playlist)
-print(playlist)
